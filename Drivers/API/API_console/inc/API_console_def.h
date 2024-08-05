@@ -1,0 +1,24 @@
+/*
+ * API_console_def.h
+ *
+ *  Created on: Aug 4, 2024
+ *      Author: guirespi
+ */
+
+#ifndef API_API_CONSOLE_INC_API_CONSOLE_DEF_H_
+#define API_API_CONSOLE_INC_API_CONSOLE_DEF_H_
+
+#define CONSOLE_MAX_RECV_SIZE (8*1024)
+#define CONSOLE_UART_BAUDRATE (115200)
+
+typedef enum
+{
+	CONSOLE_STATE_DISABLE		= -1,
+	CONSOLE_STATE_INIT 			= 0,
+	CONSOLE_STATE_READY 	   ,
+	CONSOLE_STATE_LISTEN 	   ,
+	CONSOLE_STATE_RECV_COMPLETE,
+	CONSOLE_STATE_ERROR,
+}console_state_t;
+
+#endif /* API_API_CONSOLE_INC_API_CONSOLE_DEF_H_ */

@@ -1,0 +1,3 @@
+../Drivers/API/API_console/src/API_console.c:13:5:console_init	16	static
+../Drivers/API/API_console/src/API_console.c:18:5:console_send_data	16	static
+../Drivers/API/API_console/src/API_console.c:23:5:console_recv_data	16	static
