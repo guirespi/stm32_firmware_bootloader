@@ -1,0 +1,5 @@
+../Drivers/API/API_log/src/API_log.c:17:13:log_write_s	3
+../Drivers/API/API_log/src/API_log.c:29:6:log_set_transmit_function	1
+../Drivers/API/API_log/src/API_log.c:37:6:log_buffer_hexdump	11
+../Drivers/API/API_log/src/API_log.c:85:6:log_write	1
+../Drivers/API/API_log/src/API_log.c:93:10:log_timestamp	1

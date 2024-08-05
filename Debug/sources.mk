@@ -26,8 +26,9 @@ Core/Src \
 Core/Startup \
 Drivers/API/API_console/arch/arm \
 Drivers/API/API_console/src \
+Drivers/API/API_log/arch/arm \
+Drivers/API/API_log/src \
 Drivers/API/API_spi_flash/arch/arm \
 Drivers/API/API_spi_flash/src \
-Drivers/API/api_uart/src \
 Drivers/STM32F4xx_HAL_Driver/Src \
 

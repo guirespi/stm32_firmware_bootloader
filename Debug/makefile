@@ -10,9 +10,10 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
--include Drivers/API/api_uart/src/subdir.mk
 -include Drivers/API/API_spi_flash/src/subdir.mk
 -include Drivers/API/API_spi_flash/arch/arm/subdir.mk
+-include Drivers/API/API_log/src/subdir.mk
+-include Drivers/API/API_log/arch/arm/subdir.mk
 -include Drivers/API/API_console/src/subdir.mk
 -include Drivers/API/API_console/arch/arm/subdir.mk
 -include Core/Startup/subdir.mk

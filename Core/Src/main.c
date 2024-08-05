@@ -62,7 +62,18 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 #include "API_console.h"
+#include "API_log.h"
 #include <string.h>
+
+const char * tag = "main.c";
+#define print_serial_info(format, ...) LOG_LEVEL(LOG_INFO, tag, format, ##__VA_ARGS__)
+#define print_serial_warn(format, ...) LOG_LEVEL(LOG_WARN, tag, format, ##__VA_ARGS__)
+#define print_serial_hex(data, data_size) LOG_HEXDUMP(tag, data, data_size, LOG_WARN)
+
+static void log_by_usart3(uint8_t * data, uint16_t data_size)
+{
+	HAL_UART_Transmit(&huart3, data, data_size, 1000);
+}
 /* USER CODE END 0 */
 
 /**
@@ -99,6 +110,8 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   console_init(&huart2);
+  log_set_transmit_function((log_transmit_f)log_by_usart3);
+
 
   /* USER CODE END 2 */
 
@@ -107,15 +120,18 @@ int main(void)
   uint8_t buffer[8*1024] = {0};
   uint16_t recv_length = 0;
   console_send_data((uint8_t *)"Console ready to operate!\r\n", strlen("Console ready to operate!\r\n") + 1);
+  print_serial_info("Before starting while loop");
+  uint32_t count = 0;
   while (1)
   {
-
+	  count++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	  int rt = console_recv_data(buffer, &recv_length);
 	  if(rt == 0 && recv_length > 0)
 	  {
+		  print_serial_hex(buffer, recv_length);
 		  buffer[recv_length + 1] = '\r';
 		  buffer[recv_length + 2] = '\n';
 		  buffer[recv_length + 3] = '\0';
