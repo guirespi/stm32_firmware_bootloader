@@ -17,7 +17,7 @@ int console_init(comm_channel_hdle comm_channel_hdle)
 
 int console_send_data(uint8_t * data, uint16_t data_size)
 {
-	console_arch_common_comm_channel_send(data, data_size);
+	return console_arch_common_comm_channel_send(data, data_size);
 }
 
 int console_recv_data(uint8_t * buffer, uint16_t * recv_length)

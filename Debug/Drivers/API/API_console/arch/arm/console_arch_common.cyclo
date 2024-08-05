@@ -1,0 +1,7 @@
+../Drivers/API/API_console/arch/arm/console_arch_common.c:36:13:console_copy_console_buffer_to_user_buffer	1
+../Drivers/API/API_console/arch/arm/console_arch_common.c:42:13:console_timeout_start	1
+../Drivers/API/API_console/arch/arm/console_arch_common.c:49:13:console_timeout_read	3
+../Drivers/API/API_console/arch/arm/console_arch_common.c:61:6:HAL_UART_RxCpltCallback	4
+../Drivers/API/API_console/arch/arm/console_arch_common.c:85:5:console_arch_common_comm_channel_init	4
+../Drivers/API/API_console/arch/arm/console_arch_common.c:115:5:console_arch_common_comm_channel_send	3
+../Drivers/API/API_console/arch/arm/console_arch_common.c:125:5:console_arch_common_comm_channel_receive	9

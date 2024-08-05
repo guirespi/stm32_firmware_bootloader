@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_gpio.h"
 
 #include "console_arch_common.h"
 
@@ -59,7 +60,7 @@ static bool console_timeout_read(void)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance == USART3)
+	if(huart->Instance == uart_handle->Instance)
 	{
 		console_buffer_index++;
 		if(console_timeout_read())
@@ -83,15 +84,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 int console_arch_common_comm_channel_init(void * channel_hdle, volatile console_state_t * state_ref)
 {
-	if(channel_hdle != NULL && state_ref != NULL) return CONSOLE_ARCH_OK;
+	if(uart_handle != NULL && console_state != NULL) return CONSOLE_ARCH_OK;
 	int rt = 0;
 
 	UART_HandleTypeDef * UartHandle = (UART_HandleTypeDef *) channel_hdle;
 
 	/* Initialize UART hardware */
-	UartHandle->Instance = USART3;
-	HAL_UART_MspInit(UartHandle);
-
 	/* UART configuration */
 	UartHandle->Init.BaudRate = CONSOLE_UART_BAUDRATE;
 	UartHandle->Init.WordLength = UART_WORDLENGTH_8B;
@@ -148,6 +146,7 @@ int console_arch_common_comm_channel_receive(uint8_t * data, uint16_t * data_siz
 			rt = CONSOLE_ARCH_OK;
 			console_copy_console_buffer_to_user_buffer(console_buffer, console_buffer_index, data, data_size);
 			*console_state = CONSOLE_STATE_READY;
+			break;
 		}
 		case CONSOLE_STATE_ERROR:
 		{
@@ -157,12 +156,12 @@ int console_arch_common_comm_channel_receive(uint8_t * data, uint16_t * data_siz
 		default:
 		{
 			console_buffer_index = 0;
-			memset(console_buffer, 0, CONSOLE_MAX_RECV_SIZE);
+			memset((void *)console_buffer, 0, CONSOLE_MAX_RECV_SIZE);
 			rt = HAL_UART_Receive_IT(uart_handle, (uint8_t *)(console_buffer + console_buffer_index), CONSOLE_ARCH_UART_LISTEN_BYTE_SIZE);
 			if(rt == 0)
 			{
 				*console_state = CONSOLE_STATE_LISTEN;
-				console_timeout_start(CONSOLE_ARCH_UART_TRANSMIT_TIMEOUT);
+				console_timeout_start(CONSOLE_ARCH_UART_BYTE_TRANSMIT_TIMEOUT_MS);
 			}
 			break;
 		}

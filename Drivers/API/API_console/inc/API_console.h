@@ -8,7 +8,7 @@
 #ifndef API_API_CONSOLE_INC_API_CONSOLE_H_
 #define API_API_CONSOLE_INC_API_CONSOLE_H_
 
-#include "API_console_def.h";
+#include "API_console_def.h"
 
 typedef void * comm_channel_hdle;
 
