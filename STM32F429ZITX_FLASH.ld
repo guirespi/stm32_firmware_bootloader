@@ -46,9 +46,17 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   CCMRAM    (xrw)    : ORIGIN = 0x10000000,   LENGTH = 64K
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 192K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 2048K
+  RAM    (xrw)     : ORIGIN = 0x20000000,   LENGTH = 192K
+  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 512K /* Where bootloader lives */
+  APP      (xrw)   : ORIGIN = 0x8080000,   LENGTH = 512K /* Where application target lives */
+  prog_00  (rx)    : ORIGIN = 0x8100000,   LENGTH = 512K /* Test: First binary */
+  prog_01  (rx)    : ORIGIN = 0x8180000,   LENGTH = 512K /* Test: Second binary binary */
 }
+
+ TARGET(binary) /* specify the file format of binary file */
+ INPUT (../prog_00.bin) /* first bin file path (relative to the output folder)*/
+ INPUT (../prog_01.bin) /* second bin file path (relative to the output folder)*/
+ OUTPUT_FORMAT(default) /* restore the out file format */
 
 /* Sections */
 SECTIONS
@@ -205,4 +213,18 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
+  
+  
+  ._prog_00 :
+  {
+  	KEEP (*(._prog_00))
+  	../prog_00.bin
+  }>prog_00
+  
+  ._prog_01 :
+  {
+	KEEP (*(._prog_01))
+  	../prog_01.bin
+  }>prog_01
+  
 }

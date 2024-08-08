@@ -10,6 +10,9 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
+-include Drivers/BSP/STM32F4xx_Nucleo_144/subdir.mk
+-include Drivers/API/api_delay/src/subdir.mk
+-include Drivers/API/api_debounce/Src/subdir.mk
 -include Drivers/API/API_spi_flash/src/subdir.mk
 -include Drivers/API/API_spi_flash/arch/arm/subdir.mk
 -include Drivers/API/API_log/src/subdir.mk
@@ -58,6 +61,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 1B_PDM_PCDM_FINAL_JOB.list \
 
+OBJCOPY_BIN += \
+1B_PDM_PCDM_FINAL_JOB.bin \
+
 
 # All Target
 all: main-build
@@ -81,12 +87,17 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+1B_PDM_PCDM_FINAL_JOB.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "1B_PDM_PCDM_FINAL_JOB.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) 1B_PDM_PCDM_FINAL_JOB.elf 1B_PDM_PCDM_FINAL_JOB.list 1B_PDM_PCDM_FINAL_JOB.map default.size.stdout
+	-$(RM) 1B_PDM_PCDM_FINAL_JOB.bin 1B_PDM_PCDM_FINAL_JOB.elf 1B_PDM_PCDM_FINAL_JOB.list 1B_PDM_PCDM_FINAL_JOB.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
