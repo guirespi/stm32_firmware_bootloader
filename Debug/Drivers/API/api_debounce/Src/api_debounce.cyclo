@@ -1,3 +1,0 @@
-../Drivers/API/api_debounce/Src/api_debounce.c:24:6:debounceFSM_init	1
-../Drivers/API/api_debounce/Src/api_debounce.c:31:6:debounceFSM_update	11
-../Drivers/API/api_debounce/Src/api_debounce.c:88:8:readKey	2

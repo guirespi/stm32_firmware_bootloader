@@ -1,4 +1,0 @@
-../Drivers/API/API_spi_flash/arch/arm/arch_stm32f4xx.c:25:20:spi_flash_arch_ready	1
-../Drivers/API/API_spi_flash/arch/arm/arch_stm32f4xx.c:30:5:spi_flash_arch_set_spi_hdle	2
-../Drivers/API/API_spi_flash/arch/arm/arch_stm32f4xx.c:37:5:spi_flash_arch_read_spi	2
-../Drivers/API/API_spi_flash/arch/arm/arch_stm32f4xx.c:44:5:spi_flash_arch_write_spi	2
