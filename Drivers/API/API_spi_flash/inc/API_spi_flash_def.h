@@ -36,4 +36,17 @@
 #define API_SPI_FLASH_CMD_ENABLE_RESET (0x66U)
 #define API_SPI_FLASH_CMD_RESET_DEVICE (0x99U)
 
+#define API_SPI_FLASH_BSY_BIT (1<<0)
+#define API_SPI_FLASH_WEL_BIT (1<<1)
+
+#define API_SPI_FLASH_BSY_IS_SET(reg)	((reg & API_SPI_FLASH_BSY_BIT) == API_SPI_FLASH_BSY_BIT)
+#define API_SPI_FLASH_WEL_IS_SET(reg)	((reg & API_SPI_FLASH_WEL_BIT) == API_SPI_FLASH_WEL_BIT)
+
+typedef struct __attribute__((packed))
+{
+	uint8_t manufacturer_id;
+	uint8_t memory_type;
+	uint8_t memory_capacity;
+}spi_flash_jedec_id;
+
 #endif /* API_API_SPI_FLASH_INC_API_SPI_FLASH_DEF_H_ */

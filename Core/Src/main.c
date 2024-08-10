@@ -1188,6 +1188,8 @@ void bootloader_boot(uint32_t boot_address)
 		print_serial_warn("No application found in 0x%x", boot_address);
 	}
 }
+#include "API_spi_flash.h"
+#include <stdbool.h>
 /* USER CODE END 0 */
 
 /**
@@ -1233,10 +1235,17 @@ int main(void)
   uint16_t recv_length = 0;
   console_send_data((uint8_t *)"Console ready to operate!\r\n", strlen("Console ready to operate!\r\n") + 1);
   print_serial_info("Before starting while loop");
+
+  spi_flash_cs_t cs_gpio = {.port = (uint32_t)GPIOC, .pin = GPIO_PIN_7};
+  int rt = spi_flash_init(&hspi1, cs_gpio);
+  uint8_t read_buffer[4096] = {0};
+  rt = spi_flash_erase_range(0, 4096);
+  rt = spi_flash_read(read_buffer, 0, sizeof(read_buffer));
+//  rt = spi_flash_write(prog_00, 0, 4096);
+  bool all = rt == 0?true:false;
+
   while (1)
   {
-	  print_serial_warn("5 seconds to start flash process...");
-	  HAL_Delay(3000);
 //    /* USER CODE END WHILE */
 //	  /*To erase APP partition:
 //	   * -> Sector 8: 0x08080000 - 0x080A0000
@@ -1247,8 +1256,8 @@ int main(void)
 //
 //	  FLASH_EraseInitTypeDef pEraseInit = {0};
 //	  pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-//	  pEraseInit.Sector = FLASH_SECTOR_9;
-//	  pEraseInit.NbSectors = 3; /*We want to erase from Sector 8 to Sector 11*/
+//	  pEraseInit.Sector = FLASH_SECTOR_8;
+//	  pEraseInit.NbSectors = 4; /*We want to erase from Sector 8 to Sector 11*/
 //	  pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 //
 //	  int err = HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
@@ -1263,47 +1272,47 @@ int main(void)
 //
 //	  HAL_FLASH_Lock();
 
-	  int err = 0;
-	  if(err == HAL_OK)
-	  {
-		  print_serial_warn("Starting application programming into flash");
-		  uint32_t prog_00_len = sizeof(prog_00);
-		  HAL_FLASH_Unlock();
-
-		  for(uint32_t i = 0; i < prog_00_len; i++)
-		  {
-			  err = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, APP_ADDR+i, prog_00[i]);
-			  if(err != HAL_OK)
-			  {
-				  print_serial_warn("Program return error %d", err);
-				  break;
-			  }
-		  }
-
-		  HAL_FLASH_Lock();
-	  }
-
-	  if(err == HAL_OK)
-	  {
-		  print_serial_info("Programming OK! Booting new app");
-		  bootloader_boot(APP_ADDR);
-	  }
-	  else
-	  {
-    /* USER CODE BEGIN 3 */
-		int rt = console_recv_data(buffer, &recv_length);
-		if(rt == 0 && recv_length > 0)
-		{
-		  print_serial_hex(buffer, recv_length);
-		  buffer[recv_length + 1] = '\r';
-		  buffer[recv_length + 2] = '\n';
-		  buffer[recv_length + 3] = '\0';
-		  console_send_data((uint8_t *)"Received:\r\n", strlen("Received\r\n") + 1);
-		  console_send_data(buffer, recv_length + 3);
-		  memset(buffer, 0, 8*1024);
-		  recv_length = 0;
-		}
-	  }
+//	  int err = 0;
+//	  if(err == HAL_OK)
+//	  {
+//		  print_serial_warn("Starting application programming into flash");
+//		  uint32_t prog_00_len = sizeof(prog_00);
+//		  HAL_FLASH_Unlock();
+//
+//		  for(uint32_t i = 0; i < prog_00_len; i++)
+//		  {
+//			  err = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, APP_ADDR+i, prog_00[i]);
+//			  if(err != HAL_OK)
+//			  {
+//				  print_serial_warn("Program return error %d", err);
+//				  break;
+//			  }
+//		  }
+//
+//		  HAL_FLASH_Lock();
+//	  }
+//
+//	  if(err == HAL_OK)
+//	  {
+//		  print_serial_info("Programming OK! Booting new app");
+//		  bootloader_boot(APP_ADDR);
+//	  }
+//	  else
+//	  {
+//    /* USER CODE BEGIN 3 */
+//		int rt = console_recv_data(buffer, &recv_length);
+//		if(rt == 0 && recv_length > 0)
+//		{
+//		  print_serial_hex(buffer, recv_length);
+//		  buffer[recv_length + 1] = '\r';
+//		  buffer[recv_length + 2] = '\n';
+//		  buffer[recv_length + 3] = '\0';
+//		  console_send_data((uint8_t *)"Received:\r\n", strlen("Received\r\n") + 1);
+//		  console_send_data(buffer, recv_length + 3);
+//		  memset(buffer, 0, 8*1024);
+//		  recv_length = 0;
+//		}
+//	  }
 
   }
   /* USER CODE END 3 */

@@ -20,17 +20,36 @@ typedef enum
 	SPI_FLASH_E_READY,
 	SPI_FLASH_E_ARCH,
 	SPI_FLASH_E_IO,
+	SPI_FLASH_E_BUSY,
+	SPI_FLASH_E_FAIL,
+	SPI_FLASH_E_ADDRESS,
+	SPI_FLASH_E_BOUNDARIES,
 }spi_flash_err_t;
 
-int spi_flash_init(spi_if_hdle spi_if_hdle);
+typedef enum
+{
+	SPI_FLASH_STATE_DISABLE = 0,
+	SPI_FLASH_STATE_INIT,
+	SPI_FLASH_STATE_POWER_ON,
+	SPI_FLASH_STATE_READY,
+	SPI_FLASH_STATE_WRITE_READY,
+	SPI_FLASH_STATE_BUSY,
+	SPI_FLASH_STATE_ERROR,
+}spi_flash_state_t;
+
+typedef struct
+{
+	uint32_t port;
+	uint16_t pin;
+}spi_flash_cs_t;
+
+int spi_flash_init(spi_if_hdle spi_if_hdle, spi_flash_cs_t cs_gpio);
 
 int spi_flash_read(uint8_t * buffer, uint32_t address, uint32_t size);
 
 int spi_flash_write(uint8_t * buffer, uint32_t address, uint32_t size);
 
 int spi_flash_erase_range(size_t address, uint32_t size);
-
-int spi_flash_erase_chip(void);
 
 int spi_flash_deinit(void);
 
