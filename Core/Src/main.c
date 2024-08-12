@@ -1189,6 +1189,7 @@ void bootloader_boot(uint32_t boot_address)
 	}
 }
 #include "API_spi_flash.h"
+#include "app_bootloader_command.h"
 #include <stdbool.h>
 /* USER CODE END 0 */
 
@@ -1243,6 +1244,35 @@ int main(void)
   rt = spi_flash_read(read_buffer, 0, sizeof(read_buffer));
 //  rt = spi_flash_write(prog_00, 0, 4096);
   bool all = rt == 0?true:false;
+
+  app_bootloader_build_res_t build_digest = {0};
+  int err =  app_bootloader_build_hello(&build_digest);
+  print_serial_warn("Bootloader hello frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_req(&build_digest, 1, 17000);
+  print_serial_warn("Bootloader download request frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_param_req(&build_digest, 0, 4000);
+  print_serial_warn("Bootloader download param request frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_param_res(&build_digest, 0, 4, 2);
+  print_serial_warn("Bootloader download param response frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_block_req(&build_digest, 2);
+  print_serial_warn("Bootloader download block request frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_block_res(&build_digest, 2, 2, (uint8_t []){0xff,0xff});
+  print_serial_warn("Bootloader download block response frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
+
+  err = app_bootloader_build_dl_end(&build_digest);
+  print_serial_warn("Bootloader download end frame returned %d", err);
+  print_serial_hex(build_digest.frame, build_digest.frame_size);
 
   while (1)
   {
