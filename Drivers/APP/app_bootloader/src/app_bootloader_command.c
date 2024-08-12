@@ -30,6 +30,11 @@ int app_bootloader_build_hello(app_bootloader_build_res_t * build_digest)
 	return app_bootloader_command_build(APP_BOOTLOADER_CMD_HELLO, NULL, 0, build_digest);
 }
 
+int app_bootloader_build_host_hello(app_bootloader_build_res_t * build_digest)
+{
+	return app_bootloader_command_build(APP_BOOTLOADER_CMD_HOST_HELLO, NULL, 0, build_digest);
+}
+
 int app_bootloader_build_dl_req(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr, uint32_t binary_size)
 {
 	app_bootloader_cmd_dl_req cmd_data = {.part_nbr = partition_nbr, .binary_size = binary_size};
@@ -83,6 +88,32 @@ int app_bootloader_build_dl_block_res(app_bootloader_build_res_t * build_digest,
 int app_bootloader_build_dl_end(app_bootloader_build_res_t * build_digest)
 {
 	return app_bootloader_command_build(APP_BOOTLOADER_CMD_DOWNLOAD_END, NULL, 0, build_digest);
+}
+
+int app_bootloader_build_boot_app(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr)
+{
+	app_bootloader_cmd_boot_app cmd_data = {.partition_nbr = partition_nbr};
+	void * data = (void *) &cmd_data;
+	uint32_t data_size = sizeof(cmd_data);
+	return app_bootloader_command_build(APP_BOOTLOADER_CMD_DOWNLOAD_REQ, data, data_size, build_digest);
+}
+
+int app_bootloader_build_error(app_bootloader_build_res_t * build_digest, uint8_t error, char * message)
+{
+	if(build_digest == NULL) return APP_BOOTLOADER_CMD_E_NULL;
+	if(message == NULL) return APP_BOOTLOADER_CMD_E_PARAM;
+	app_bootloader_cmd_err * cmd_data = NULL;
+	uint32_t buffer_size = sizeof(*cmd_data) + strlen(message) + 1;
+	void * buffer = (void *) malloc(buffer_size);
+	if(buffer == NULL) return APP_BOOTLOADER_CMD_E_MEM;
+
+	cmd_data = (app_bootloader_cmd_err *) buffer;
+	cmd_data->error = error;
+	strcpy(cmd_data->error_msg, message);
+
+	int rt = app_bootloader_command_build(APP_BOOTLOADER_CMD_ERROR, (uint8_t *)buffer, buffer_size, build_digest);
+	free(buffer);
+	return rt;
 }
 
 int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_bootloader_frame_t ** command_digest)
