@@ -24,7 +24,7 @@ typedef enum
 	APP_BOOTLOADER_CMD_DOWNLOAD_PARAM_RES, /*< Host download parameters response */
 	APP_BOOTLOADER_CMD_DOWNLOAD_BLOCK_REQ, /*< Client download block request */
 	APP_BOOTLOADER_CMD_DOWNLOAD_BLOCK_RES, /*< Host download block response */
-	APP_BOOTLOADER_CMD_DOWNLOAD_END, /*< Client download end signal */
+	APP_BOOTLOADER_CMD_END, /*< Client end signal */
 
 	/**< Commands to boot applications */
 	APP_BOOTLOADER_CMD_BOOT_APP,
@@ -36,6 +36,7 @@ typedef enum
 
 	/*< Command for error message */
 	APP_BOOTLOADER_CMD_ERROR,
+	APP_BOOTLOADER_CMD_RETRANSMIT,
 
 	APP_BOOTLOADER_CMD_MAX, /*< Boundary of available commands */
 }app_bootloader_command;
@@ -58,7 +59,7 @@ typedef enum __attribute__((packed))
 {
 	APP_BOOTLOADER_DL_RAW = 0,
 	APP_BOOTLOADER_DL_COMPRESS,
-}app_bootloder_dl_t;
+}app_bootloder_dl_type;
 
 typedef struct __attribute__((packed))
 {
@@ -130,11 +131,13 @@ int app_bootloader_build_dl_block_req(app_bootloader_build_res_t * build_digest,
 
 int app_bootloader_build_dl_block_res(app_bootloader_build_res_t * build_digest, uint32_t block_nbr, uint32_t data_size, uint8_t * data);
 
-int app_bootloader_build_dl_end(app_bootloader_build_res_t * build_digest);
+int app_bootloader_build_end(app_bootloader_build_res_t * build_digest);
 
 int app_bootloader_build_boot_app(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr);
 
 int app_bootloader_build_error(app_bootloader_build_res_t * build_digest, uint8_t error, char * message);
+
+int app_bootloader_build_retransmit(app_bootloader_build_res_t * build_digest);
 
 int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_bootloader_frame_t ** command_digest);
 

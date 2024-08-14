@@ -85,9 +85,9 @@ int app_bootloader_build_dl_block_res(app_bootloader_build_res_t * build_digest,
 	return rt;
 }
 
-int app_bootloader_build_dl_end(app_bootloader_build_res_t * build_digest)
+int app_bootloader_build_end(app_bootloader_build_res_t * build_digest)
 {
-	return app_bootloader_command_build(APP_BOOTLOADER_CMD_DOWNLOAD_END, NULL, 0, build_digest);
+	return app_bootloader_command_build(APP_BOOTLOADER_CMD_END, NULL, 0, build_digest);
 }
 
 int app_bootloader_build_boot_app(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr)
@@ -116,6 +116,13 @@ int app_bootloader_build_error(app_bootloader_build_res_t * build_digest, uint8_
 	return rt;
 }
 
+int app_bootloader_build_retransmit(app_bootloader_build_res_t * build_digest)
+{
+	return app_bootloader_command_build(APP_BOOTLOADER_CMD_RETRANSMIT, NULL, 0, build_digest);
+}
+
+
+
 int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_bootloader_frame_t ** command_digest)
 {
 	if(buffer == NULL || buffer_size == 0) return APP_BOOTLOADER_CMD_E_NULL;
@@ -131,6 +138,11 @@ int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_boo
 	switch((app_bootloader_command) frame->command)
 	{
 		case APP_BOOTLOADER_CMD_HELLO:
+		{
+			res = APP_BOOTLOADER_CMD_OK;
+			break;
+		}
+		case APP_BOOTLOADER_CMD_HOST_HELLO:
 		{
 			res = APP_BOOTLOADER_CMD_OK;
 			break;
@@ -169,9 +181,15 @@ int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_boo
 			}
 			break;
 		}
-		case APP_BOOTLOADER_CMD_DOWNLOAD_END:
+		case APP_BOOTLOADER_CMD_END:
 		{
 			res = APP_BOOTLOADER_CMD_OK;
+			break;
+		}
+		case APP_BOOTLOADER_CMD_BOOT_APP:
+		{
+			if(frame->total_length == sizeof(app_bootloader_cmd_boot_app))
+				res = APP_BOOTLOADER_CMD_OK;
 			break;
 		}
 		default:

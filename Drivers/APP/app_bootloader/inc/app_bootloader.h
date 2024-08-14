@@ -16,6 +16,7 @@ typedef enum
 	APP_BOOTLOADER_E_READY,
 	APP_BOOTLOADER_E_INVALID,
 	APP_BOOTLOADER_E_UNKNOWN,
+	APP_BOOTLOADER_E_WAIT,
 }app_bootloader_err_t;
 
 typedef enum
@@ -23,6 +24,8 @@ typedef enum
 	APP_BOOTLOADER_STATE_DISABLE = -1,
 	APP_BOOTLOADER_STATE_INIT,
 	APP_BOOTLOADER_STATE_READY,
+	APP_BOOTLOADER_STATE_DOWNLOAD_END,
+	APP_BOOTLOADER_STATE_BOOT,
 }app_bootloader_state_t;
 
 int app_bootloader_init(void);
