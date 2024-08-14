@@ -14,6 +14,14 @@
 
 static log_transmit_f log_transmit = NULL;
 
+/**
+ * @brief Write log through log_transmit function.
+ *
+ * @param format String.
+ * @param list Variable list with arguments.
+ */
+static void log_write_s(const char * format, va_list list);
+
 static void log_write_s(const char * format, va_list list)
 {
 	char * buffer = NULL;
@@ -31,7 +39,7 @@ void log_set_transmit_function(log_transmit_f transmit_function)
 	log_transmit = transmit_function;
 }
 
-/* Bytes per line for hex-dump buffer */
+/* Bytes per line for hex-dump buffer. This is a copied algorithm */
 #define BYTES_PER_LINE 16
 
 void log_buffer_hexdump(const char *tag, const void *buffer, uint16_t buff_len, log_level_t log_level)

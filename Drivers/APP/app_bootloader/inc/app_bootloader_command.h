@@ -117,28 +117,120 @@ typedef struct
 	uint16_t frame_size;
 }app_bootloader_build_res_t;
 
+/**
+ * @brief Build hello command.
+ *
+ * @param build_digest Build result.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_hello(app_bootloader_build_res_t * build_digest);
-
+/**
+ * @brief Build host hello command.
+ *
+ * @param build_digest Build result.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_host_hello(app_bootloader_build_res_t * build_digest);
-
+/**
+ * @brief Build download request command.
+ *
+ * @param build_digest Build result.
+ * @param partition_nbr Partition number to download.
+ * @param binary_size Application size.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_dl_req(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr, uint32_t binary_size);
-
+/**
+ * @brief Build download parameter request command.
+ *
+ * @param build_digest Build result.
+ * @param type Type of download.
+ * @param block_size Requested block size for download.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_dl_param_req(app_bootloader_build_res_t * build_digest, uint8_t type, uint16_t block_size);
-
+/**
+ * @brief Build download parameter response command.
+ *
+ * @param build_digest Build result.
+ * @param type Type of download.
+ * @param total_block_nbr Total number of blocks.
+ * @param block_size Block size.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_dl_param_res(app_bootloader_build_res_t * build_digest, uint8_t type, uint32_t total_block_nbr, uint16_t block_size);
-
+/**
+ * @brief Build download block request command.
+ *
+ * @param build_digest Build result.
+ * @param block_nbr Block number requested.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_dl_block_req(app_bootloader_build_res_t * build_digest, uint32_t block_nbr);
-
+/**
+ * @brief Build download block response command.
+ *
+ * @param build_digest Build result.
+ * @param block_nbr Block number.
+ * @param data_size Data size
+ * @param data Block's data.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_dl_block_res(app_bootloader_build_res_t * build_digest, uint32_t block_nbr, uint32_t data_size, uint8_t * data);
-
+/**
+ * @brief Build end command.
+ *
+ * @param build_digest Build result.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_end(app_bootloader_build_res_t * build_digest);
-
+/**
+ * @brief Build boot application command.
+ *
+ * @param build_digest Build result.
+ * @param partition_nbr Partition number to boot.
+ * @return
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_boot_app(app_bootloader_build_res_t * build_digest, uint8_t partition_nbr);
-
+/**
+ * @brief Build error command.
+ *
+ * @param build_digest Build result.
+ * @param error Error enum.
+ * @param message Message.
+ * @return
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_error(app_bootloader_build_res_t * build_digest, uint8_t error, char * message);
-
+/**
+ * @brief Build retransmit command.
+ *
+ * @param build_digest Build result.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_build_retransmit(app_bootloader_build_res_t * build_digest);
-
+/**
+ * @brief Check command format.
+ *
+ * @param buffer Received command.
+ * @param buffer_size Size of received command.
+ * @param command_digest Pointer where the parsed command will be saved.
+ * @return
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
 int app_bootloader_command_check(uint8_t * buffer, uint16_t buffer_size, app_bootloader_frame_t ** command_digest);
 
 #endif /* APPLICATION_APP_BOOTLOADER_INC_APP_BOOTLOADER_COMMAND_H_ */

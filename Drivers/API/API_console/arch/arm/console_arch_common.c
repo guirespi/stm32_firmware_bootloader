@@ -20,9 +20,9 @@
 
 typedef struct
 {
-	uint32_t 	start_time;
-	uint32_t 	duration;
-	bool 		running;
+	uint32_t 	start_time; /* Start of timeout from HAL_tick*/
+	uint32_t 	duration; /* Duration for timeout */
+	bool 		running; /* Is timeout running? */
 }console_timeout_t;
 
 static UART_HandleTypeDef * uart_handle = NULL;
@@ -30,8 +30,29 @@ static volatile console_state_t * console_state = NULL;
 
 static volatile uint8_t console_buffer[CONSOLE_MAX_RECV_SIZE] = {0};
 static volatile uint16_t console_buffer_index = 0;
-
 static volatile console_timeout_t console_timeout = {0};
+
+/**
+ * @brief Copy console buffer into user buffer.
+ *
+ * @param console_buffer Console buffer.
+ * @param console_buffer_size Received data in console buffer.
+ * @param user_buffer User buffer.
+ * @param recv_len Pointer where the value of 'console_buffer_size' will be copy.
+ */
+static void console_copy_console_buffer_to_user_buffer(volatile uint8_t * console_buffer, volatile uint16_t console_buffer_size, uint8_t * user_buffer, uint16_t * recv_len);
+/**
+ * @brief Start a console timeout.
+ *
+ * @param duration_ms milliseconds timeout.
+ */
+static void console_timeout_start(uint32_t duration_ms);
+/**
+ * @brief Read the console timeout
+ *
+ * @return true: timeout reached. false: timeout not reached.
+ */
+static bool console_timeout_read(void);
 
 static void console_copy_console_buffer_to_user_buffer(volatile uint8_t * console_buffer, volatile uint16_t console_buffer_size, uint8_t * user_buffer, uint16_t * recv_len)
 {

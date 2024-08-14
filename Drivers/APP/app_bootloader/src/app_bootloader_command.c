@@ -2,6 +2,18 @@
 #include <string.h>
 #include "app_bootloader_command.h"
 
+/**
+ * @brief Build a app bootloader command.
+ *
+ * @param command Command id.
+ * @param data Command's data. Can be NULL.
+ * @param data_size Data size.
+ * @param build_digest Build result.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
+int static app_bootloader_command_build(app_bootloader_command command, uint8_t * data, uint32_t data_size, app_bootloader_build_res_t * build_digest);
+
 int static app_bootloader_command_build(app_bootloader_command command, uint8_t * data, uint32_t data_size, app_bootloader_build_res_t * build_digest)
 {
 	if(build_digest == NULL) return APP_BOOTLOADER_CMD_E_NULL;

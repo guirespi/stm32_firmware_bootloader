@@ -23,6 +23,11 @@ static spi_flash_arch_rx_it_hdle _spi_rx_hdle = NULL;
 static uint32_t _port = 0;
 static uint16_t _pin = 0;
 
+/**
+ * @brief Check if SPI handle is ready.
+ *
+ * @return true: read. false: not ready.
+ */
 static inline bool spi_flash_arch_ready(void);
 
 static inline bool spi_flash_arch_ready(void)

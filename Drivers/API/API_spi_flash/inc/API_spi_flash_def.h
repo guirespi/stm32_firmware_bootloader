@@ -42,11 +42,13 @@
 #define API_SPI_FLASH_BSY_IS_SET(reg)	((reg & API_SPI_FLASH_BSY_BIT) == API_SPI_FLASH_BSY_BIT)
 #define API_SPI_FLASH_WEL_IS_SET(reg)	((reg & API_SPI_FLASH_WEL_BIT) == API_SPI_FLASH_WEL_BIT)
 
+/* JEDEC has an unique ID for each manufacturer. It also give us the memory capacity.
+ * Each vendor must describe the meaning of 'memory_type' and 'memory_capacity' field */
 typedef struct __attribute__((packed))
 {
-	uint8_t manufacturer_id;
-	uint8_t memory_type;
-	uint8_t memory_capacity;
+	uint8_t manufacturer_id; /*< Manufacturer ID */
+	uint8_t memory_type; /*< Memory type */
+	uint8_t memory_capacity; /*< Memory capacity */
 }spi_flash_jedec_id;
 
 #endif /* API_API_SPI_FLASH_INC_API_SPI_FLASH_DEF_H_ */

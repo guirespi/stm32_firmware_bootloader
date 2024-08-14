@@ -39,15 +39,142 @@
 
 typedef struct
 {
-	uint8_t vendor_id;
-	uint8_t chip_type;
-	uint32_t chip_size;
-	spi_flash_state_t chip_state;
-	uint8_t chip_last_command;
+	uint8_t vendor_id; /* Vendor ID */
+	uint8_t chip_type; /* Memory type */
+	uint32_t chip_size; /* Chip size to check boundaries */
+	spi_flash_state_t chip_state; /*  Chip state */
 }spi_flash_chip_t;
 
 /* We initialize the chip state to SPI_FLASH_STATE_DISABLE */
 static spi_flash_chip_t spi_flash_chip = {0};
+
+/**
+ * @brief SPI IT rx handler.
+ *
+ * @param spi_hdle SPI handle.
+ * @param data Data received.
+ * @param size Data size received.
+ */
+static void spi_flash_rx_it_hdle(void * spi_hdle, uint8_t * data, uint16_t size);
+/**
+ * @brief Send a command with arguments and poll to receive.
+ *
+ * @param command Command with arguments array.
+ * @param command_size Command size.
+ * @param response Response buffer.
+ * @param response_size Expcted response size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_send_advanced_command_receive(uint8_t * command, uint16_t command_size, uint8_t * response, uint16_t response_size);
+/**
+ * @brief Send a command with arguments. No response expected.
+ *
+ * @param command Command with arguments array.
+ * @param command_size Command size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_send_advanced_command(uint8_t * command, uint16_t command_size);
+/**
+ * @brief Send a basic command. No response expected.
+ *
+ * @param command Command.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_send_basic_command(uint8_t command);
+/**
+ * @brief Send basic command and poll to receive.
+ *
+ * @param command Command.
+ * @param response Response buffer.
+ * @param response_size Expected response size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_send_basic_command_receive(uint8_t command, uint8_t * response, uint16_t response_size);
+/**
+ * @brief Poll operation to get status register 1 of SPI flash.
+ *
+ * @param reg Buffer for register.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_get_status_reg_1(uint8_t * reg);
+/**
+ * @brief Wait until chip if status register is in write enable state.
+ *
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_wait_until_chip_write_enable(void);
+/**
+ * @brief Wait until the chip finish a write/erase operation.
+ *
+ * @param ms Milliseconds for timeout.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_wait_until_chip_ready(uint32_t ms);
+/**
+ * @brief Polled operation to program a SPI flash page.
+ *
+ * @param buffer Buffer to program.
+ * @param address Address to program.
+ * @param size Size to program.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_program_page(uint8_t * buffer, uint32_t address, uint16_t size);
+/**
+ * @brief Polled operation to read SPI flash address.
+ *
+ * @param buffer Buffer.
+ * @param address Address to read.
+ * @param size Size to read.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ */
+static int spi_flash_read_address(uint8_t * buffer, uint32_t address, uint32_t size);
+/**
+ * @brief Polled operation to erase a sector.
+ *
+ * @param address Address to erase. Aligned with sector size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_erase_sector(uint32_t address);
+/**
+ * @brief Polled operation to erase a 32kB block.
+ *
+ * @param address Address to erase. Aligned with sector size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_erase_block32(uint32_t address);
+/**
+ * @brief Polled operation to erase 64kB block.
+ *
+ * @param address Address to erase. Aligned with sector size.
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_erase_block64(uint32_t address);
+/**
+ * @brief Polled operation to erase all SPI FLASH.
+ *
+ * @return
+ * 			- SPI_FLASH_OK if no error.
+ * 			- SPI_FLASH_E_TIMEOUT timeout reached.
+ */
+static int spi_flash_erase_chip(void);
 
 static void spi_flash_rx_it_hdle(void * spi_hdle, uint8_t * data, uint16_t size)
 {
@@ -449,9 +576,3 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 	SPI_FLASH_SET_CHIP_STATE(SPI_FLASH_STATE_READY);
 	return rt;
 }
-
-int spi_flash_deinit(void)
-{
-	return 0;
-}
-

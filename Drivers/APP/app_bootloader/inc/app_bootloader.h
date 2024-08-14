@@ -28,8 +28,20 @@ typedef enum
 	APP_BOOTLOADER_STATE_BOOT,
 }app_bootloader_state_t;
 
+/**
+ * @brief Initialize bootloader application.
+ *
+ * @return
+ * 			- APP_BOOTLOADER_OK if no error.
+ */
 int app_bootloader_init(void);
-
+/**
+ * @brief Start and update state of bootloader application.
+ *
+ * @return
+ * 			- APP_BOOTLOADER_OK if no error.
+ * 			- APP_BOOTLOADER_E_WAIT waiting for host command.
+ */
 int app_bootloader_start(void);
 
 

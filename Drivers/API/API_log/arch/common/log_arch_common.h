@@ -10,6 +10,11 @@
 
 #include <stdint.h>
 
+/**
+ * @brief Get arch specific timestamp.
+ *
+ * @return Arch specific timestamp
+ */
 uint32_t log_arch_common_timestamp(void);
 
 #endif /* API_API_LOG_ARCH_COMMON_LOG_ARCH_COMMON_H_ */

@@ -32,6 +32,10 @@
 
 typedef void (*jump_function)(void);
 
+/**
+ * @brief Bootloader download state structure.
+ *
+ */
 typedef struct
 {
 	uint32_t actual_size;
@@ -43,12 +47,19 @@ typedef struct
 	uint8_t partition_nbr;
 }app_bootloader_dl_t;
 
+/**
+ * @brief Bootloader application machine.
+ *
+ */
 typedef struct
 {
 	app_bootloader_state_t state;
 	app_bootloader_dl_t dl_status;
 }app_bootloader_t;
-
+/**
+ * @brief Structure of bootloader partition to save applications.
+ *
+ */
 typedef struct
 {
 	uint8_t partition_nbr;
@@ -56,11 +67,15 @@ typedef struct
 	uint32_t size;
 }app_bootloader_partition_t;
 
+/**
+ * @brief Header saved in each application partition to know its info.
+ *
+ */
 typedef struct __attribute__((packed))
 {
-	uint16_t magic_byte;
-	uint32_t size;
-	uint32_t flag;
+	uint16_t magic_byte; /* Magic byte to detect data */
+	uint32_t size; /* Saved partition size */
+	uint32_t flag; /* Flags of partition */
 }app_bootloader_partition_info_t;
 
 static volatile app_bootloader_t app_bootloader = {.state = APP_BOOTLOADER_STATE_DISABLE};
@@ -80,7 +95,53 @@ static delay_t frame_timeout;
 
 #define partition_array_size (sizeof(partition_array)/sizeof(partition_array[0]))
 
-void bootloader_boot(uint32_t boot_address)
+/**
+ * @brief Verify and boot from a MCU flash address.
+ *
+ * @param boot_address Application address.
+ */
+static void bootloader_boot(uint32_t boot_address);
+/**
+ * @brief Get a partition size.
+ *
+ * @param partition_number Partition number.
+ * @return Partition size.
+ */
+static uint32_t app_bootloader_get_partition_size(uint8_t partition_number);
+/**
+ * @brief Get the offset of a partition.
+ *
+ * @param partition_number Partition number.
+ * @return Partition offset.
+ */
+static int app_bootloader_get_partition_offset(uint8_t partition_number);
+/**
+ * @brief Set bootloader state.
+ *
+ * @param new_state New state to set.
+ */
+static inline void app_bootloader_set_state(app_bootloader_state_t new_state);
+/**
+ * @brief Get bootloader state.
+ *
+ * @return Bootloader state enum.
+ */
+static inline volatile app_bootloader_state_t app_bootloader_get_state(void);
+/**
+ * @brief Clean bootloader console's buffer.
+ *
+ */
+static inline void app_bootlaoder_clean_buffer(void);
+/**
+ * @brief Send bootloader frame through console.
+ *
+ * @param build_digest Build digest to send.
+ * @return
+ * 			- APP_BOOTLOADER_CMD_OK if no error.
+ */
+static int app_bootloader_send_frame(app_bootloader_build_res_t * build_digest);
+
+static void bootloader_boot(uint32_t boot_address)
 {
 	uint32_t jump_address;
 	jump_function jump_to_app = NULL;
