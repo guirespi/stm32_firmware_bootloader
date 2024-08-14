@@ -12,6 +12,8 @@
 #include "API_spi_flash_def.h"
 #include "API_spi_flash.h"
 
+#include "port_delay.h"
+
 #define SPI_FLASH_GET_CHIP_STATE (spi_flash_chip.chip_state)
 #define SPI_FLASH_SET_CHIP_STATE(new_state) (spi_flash_chip.chip_state = new_state)
 #define SPI_FLASH_DEFAULT_WRITE_TIMEOUT (10) /* 10 milliseconds */
@@ -27,6 +29,14 @@
 
 #define SPI_FLASH_HTONL(address) (((address & 0x000000ff)<<24)|((address & 0x0000ff00)<<8|((address & 0x00ff0000)>>8)|(address & 0xff000000)>>24))
 
+/* The following values are set based in W25Q64JV datasheet and the max time for each operarion */
+#define SPI_FLASH_WRITE_STATUS_MAX_TIMEOUT 	(15) /*< milliseconds */
+#define SPI_FLASH_PROGRAM_PAGE_MAX_TIMEOUT 	(3) /*< milliseconds */
+#define SPI_FLASH_SECTOR_ERASE_MAX_TIMEOUT 	(400) /*< milliseconds */
+#define SPI_FLASH_BLOCK32_ERASE_MAX_TIMEOUT (1600) /*< milliseconds */
+#define SPI_FLASH_BLOCK64_ERASE_MAX_TIMEOUT (2000) /*< milliseconds */
+#define SPI_FLASH_CHIP_ERASE_MAX_TIMEOUT 	(100*1000) /*< milliseconds */
+
 typedef struct
 {
 	uint8_t vendor_id;
@@ -41,7 +51,7 @@ static spi_flash_chip_t spi_flash_chip = {0};
 
 static void spi_flash_rx_it_hdle(void * spi_hdle, uint8_t * data, uint16_t size)
 {
-
+	/* Do nothing. We did not use SPI IT functions */
 	return;
 }
 
@@ -97,31 +107,63 @@ static int spi_flash_wait_until_chip_write_enable(void)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	while(true)
+	port_delay_hdle delay_hdle = port_delay_init(SPI_FLASH_WRITE_STATUS_MAX_TIMEOUT);
+	if(delay_hdle == NULL)
+		return SPI_FLASH_E_MEM;
+
+	bool timeout = false;
+	while((timeout = port_delay_read(delay_hdle)) == false)
 	{
-		int rt = spi_flash_get_status_reg_1(&reg);
+		rt = spi_flash_get_status_reg_1(&reg);
+
 		if(rt != SPI_FLASH_OK)
-			return SPI_FLASH_E_IO;
+		{
+			rt = SPI_FLASH_E_IO;
+			break;
+		}
+
 		if(API_SPI_FLASH_WEL_IS_SET(reg))
 			break;
 	}
+	port_delay_deinit(&delay_hdle);
+
+	if(timeout)
+		rt = SPI_FLASH_E_TIMEOUT;
+
 	return rt;
 }
 
-static int spi_flash_wait_until_chip_ready(void)
+static int spi_flash_wait_until_chip_ready(uint32_t ms)
 {
 	uint8_t reg = 0;
 	int rt = SPI_FLASH_OK;
-	while(true)
+
+	port_delay_hdle delay_hdle = port_delay_init(ms);
+	if(delay_hdle == NULL)
+		return SPI_FLASH_E_MEM;
+
+	bool timeout = false;
+	while((timeout = port_delay_read(delay_hdle)) == false)
 	{
 		rt = spi_flash_get_status_reg_1(&reg);
+
 		if(rt != SPI_FLASH_OK)
-			return SPI_FLASH_E_IO;
+		{
+			rt = SPI_FLASH_E_IO;
+			break;
+		}
+
 		if(!API_SPI_FLASH_WEL_IS_SET(reg) && !API_SPI_FLASH_BSY_IS_SET(reg))
 			break;
 	}
+	port_delay_deinit(&delay_hdle);
+
+	if(timeout)
+		rt = SPI_FLASH_E_TIMEOUT;
+
 	return rt;
 }
+
 static int spi_flash_program_page(uint8_t * buffer, uint32_t address, uint16_t size)
 {
 	uint8_t * command = calloc(SPI_FLASH_COMMAND_AND_ADDRESS_SIZE + size, sizeof(*command));
@@ -136,7 +178,7 @@ static int spi_flash_program_page(uint8_t * buffer, uint32_t address, uint16_t s
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready();
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_PROGRAM_PAGE_MAX_TIMEOUT);
 }
 
 static int spi_flash_read_address(uint8_t * buffer, uint32_t address, uint32_t size)
@@ -152,7 +194,7 @@ static int spi_flash_erase_sector(uint32_t address)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready();
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_SECTOR_ERASE_MAX_TIMEOUT);
 }
 
 static int spi_flash_erase_block32(uint32_t address)
@@ -162,7 +204,7 @@ static int spi_flash_erase_block32(uint32_t address)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready();
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_BLOCK32_ERASE_MAX_TIMEOUT);
 }
 
 static int spi_flash_erase_block64(uint32_t address)
@@ -172,7 +214,7 @@ static int spi_flash_erase_block64(uint32_t address)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready();
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_BLOCK64_SIZE);
 }
 
 static int spi_flash_erase_chip(void)
@@ -181,7 +223,7 @@ static int spi_flash_erase_chip(void)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready();
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_CHIP_ERASE_MAX_TIMEOUT);
 }
 
 int spi_flash_init(spi_if_hdle spi_if_hdle, spi_flash_cs_t cs_gpio)
@@ -256,7 +298,6 @@ int spi_flash_read(uint8_t * buffer, uint32_t address, uint32_t size)
 	if(buffer == 0) return SPI_FLASH_E_NULL;
 	if(size == 0) return SPI_FLASH_OK;
 	if(address > spi_flash_chip.chip_size || (address + size) > spi_flash_chip.chip_size) return SPI_FLASH_E_BOUNDARIES;
-	if(address % SPI_FLASH_SECTOR_SIZE != 0) return SPI_FLASH_E_ADDRESS;
 
 	/* Save our last 'allowed' state for this operation */
 	spi_flash_state_t last_state = SPI_FLASH_GET_CHIP_STATE;
@@ -293,9 +334,7 @@ int spi_flash_write(uint8_t * buffer, uint32_t address, uint32_t size)
 	if(size == 0) return SPI_FLASH_OK;
 	if(address > spi_flash_chip.chip_size || (address + size) > spi_flash_chip.chip_size) return SPI_FLASH_E_BOUNDARIES;
 
-	int rt = spi_flash_wait_until_chip_write_enable();
-	if(rt != SPI_FLASH_OK)
-		return rt;
+	int rt = SPI_FLASH_OK;
 
 	size_t wrote = 0;
 	size_t remaining = size;
@@ -304,6 +343,10 @@ int spi_flash_write(uint8_t * buffer, uint32_t address, uint32_t size)
 
 	while(remaining)
 	{
+		rt = spi_flash_wait_until_chip_write_enable();
+		if(rt != SPI_FLASH_OK)
+			return rt;
+
 		size_t to_write = SPI_FLASH_PAGE_SIZE;
 		if((address + wrote)%SPI_FLASH_PAGE_SIZE != 0)
 		{
@@ -347,9 +390,7 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 	if(size % SPI_FLASH_SECTOR_SIZE != 0) return SPI_FLASH_E_ADDRESS;
 	if(address > spi_flash_chip.chip_size || (address + size) > spi_flash_chip.chip_size) return SPI_FLASH_E_BOUNDARIES;
 
-	int rt = spi_flash_wait_until_chip_write_enable();
-	if(rt != SPI_FLASH_OK)
-		return rt;
+	int rt = SPI_FLASH_OK;
 
 	size_t to_erase = size;
 	size_t erased = 0;
@@ -358,13 +399,18 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 
 	while(to_erase)
 	{
+		rt = spi_flash_wait_until_chip_write_enable();
+		if(rt != SPI_FLASH_OK)
+			return rt;
+
 		/* If the address is the beginning and the size is the total of the chip, delete everything.*/
 		if(address == 0 && size == spi_flash_chip.chip_size)
 		{
 			rt = spi_flash_erase_chip();
 			if(rt == SPI_FLASH_OK)
 				to_erase = 0;
-			break;
+			else
+				break;
 		}
 		else if(to_erase % SPI_FLASH_BLOCK64_SIZE == 0)
 		{
@@ -374,6 +420,8 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 				erased += SPI_FLASH_BLOCK64_SIZE;
 				to_erase -= SPI_FLASH_BLOCK64_SIZE;
 			}
+			else
+				break;
 		}
 		else if(to_erase % SPI_FLASH_BLOCK32_SIZE == 0)
 		{
@@ -383,6 +431,8 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 				erased += SPI_FLASH_BLOCK32_SIZE;
 				to_erase -= SPI_FLASH_BLOCK32_SIZE;
 			}
+			else
+				break;
 		}
 		else
 		{
@@ -392,6 +442,8 @@ int spi_flash_erase_range(size_t address, uint32_t size)
 				erased += SPI_FLASH_SECTOR_SIZE;
 				to_erase -= SPI_FLASH_SECTOR_SIZE;
 			}
+			else
+				break;
 		}
 	}
 	SPI_FLASH_SET_CHIP_STATE(SPI_FLASH_STATE_READY);

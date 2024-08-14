@@ -24,6 +24,8 @@ typedef enum
 	SPI_FLASH_E_FAIL,
 	SPI_FLASH_E_ADDRESS,
 	SPI_FLASH_E_BOUNDARIES,
+	SPI_FLASH_E_MEM,
+	SPI_FLASH_E_TIMEOUT,
 }spi_flash_err_t;
 
 typedef enum
