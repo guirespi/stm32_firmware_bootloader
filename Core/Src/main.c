@@ -66,7 +66,6 @@ static void MX_USART2_UART_Init(void);
 #include "stm32f4xx_nucleo_144.h"
 #include "API_console.h"
 #include "API_log.h"
-#include "api_debounce.h"
 
 #define tag "main.c"
 #define print_serial_info(format, ...) LOG_LEVEL(LOG_INFO, tag, format, ##__VA_ARGS__)
@@ -81,7 +80,7 @@ static void log_by_usart3(uint8_t * data, uint16_t data_size)
 }
 
 #include "API_spi_flash.h"
-#include "app_bootloader_command.h"
+#include "app_bootloader.h"
 #include <stdbool.h>
 /* USER CODE END 0 */
 
@@ -118,11 +117,11 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  print_serial_warn("------ STM32 custom bootloader ------");
 
   /* Initialize APIs: console, log and SPI flash */
   /* Set transmit function for logs. In this case through USART3 in this board.*/
   log_set_transmit_function((log_transmit_f)log_by_usart3);
+  print_serial_warn("------ STM32-F429ZI custom bootloader ------");
 
   /* Initialize console API to communicate with host computer's application */
   int rt = console_init(&huart2);
@@ -139,6 +138,7 @@ int main(void)
   else
 	  print_serial_error("SPI flash error...");
 
+  app_bootloader_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,74 +146,7 @@ int main(void)
 
   while (1)
   {
-//    /* USER CODE END WHILE */
-//	  /*To erase APP partition:
-//	   * -> Sector 8: 0x08080000 - 0x080A0000
-//	   * -> Sector 11: 0x80E0000 - 0x080FFFFF
-//	   * We must erase 4 sectors */
-//	  HAL_FLASH_Unlock();
-//	  uint32_t SectorError = 0;
-//
-//	  FLASH_EraseInitTypeDef pEraseInit = {0};
-//	  pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-//	  pEraseInit.Sector = FLASH_SECTOR_8;
-//	  pEraseInit.NbSectors = 4; /*We want to erase from Sector 8 to Sector 11*/
-//	  pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-//
-//	  int err = HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
-//	  if(err != HAL_OK)
-//	  {
-//		  print_serial_warn("Error erasing sectors. Problem sector is %x", SectorError);
-//	  }
-//	  else
-//	  {
-//		  print_serial_info("Success erasing APP sector!");
-//	  }
-//
-//	  HAL_FLASH_Lock();
-
-//	  int err = 0;
-//	  if(err == HAL_OK)
-//	  {
-//		  print_serial_warn("Starting application programming into flash");
-//		  uint32_t prog_00_len = sizeof(prog_00);
-//		  HAL_FLASH_Unlock();
-//
-//		  for(uint32_t i = 0; i < prog_00_len; i++)
-//		  {
-//			  err = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, APP_ADDR+i, prog_00[i]);
-//			  if(err != HAL_OK)
-//			  {
-//				  print_serial_warn("Program return error %d", err);
-//				  break;
-//			  }
-//		  }
-//
-//		  HAL_FLASH_Lock();
-//	  }
-//
-//	  if(err == HAL_OK)
-//	  {
-//		  print_serial_info("Programming OK! Booting new app");
-//		  bootloader_boot(APP_ADDR);
-//	  }
-//	  else
-//	  {
-//    /* USER CODE BEGIN 3 */
-//		int rt = console_recv_data(buffer, &recv_length);
-//		if(rt == 0 && recv_length > 0)
-//		{
-//		  print_serial_hex(buffer, recv_length);
-//		  buffer[recv_length + 1] = '\r';
-//		  buffer[recv_length + 2] = '\n';
-//		  buffer[recv_length + 3] = '\0';
-//		  console_send_data((uint8_t *)"Received:\r\n", strlen("Received\r\n") + 1);
-//		  console_send_data(buffer, recv_length + 3);
-//		  memset(buffer, 0, 8*1024);
-//		  recv_length = 0;
-//		}
-//	  }
-
+	  app_bootloader_start();
   }
   /* USER CODE END 3 */
 }
