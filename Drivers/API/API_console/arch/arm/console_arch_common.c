@@ -13,7 +13,7 @@
 #include "console_arch_common.h"
 
 #define CONSOLE_ARCH_UART_TRANSMIT_TIMEOUT (100)
-#define CONSOLE_ARCH_UART_BYTE_TRANSMIT_TIMEOUT_MS (1)
+#define CONSOLE_ARCH_UART_BYTE_RECV_TIMEOUT_MS (100)
 #define CONSOLE_ARCH_UART_LISTEN_BYTE_SIZE (1)
 #define CONSOLE_ARCH_CHECK_READY_NR() if(uart_handle == NULL || console_state == NULL) return;
 #define CONSOLE_ARCH_CHECK_READY() if(uart_handle == NULL || console_state == NULL) return CONSOLE_ARCH_E_READY;
@@ -76,7 +76,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			 }
 			 else
 			 {
-				console_timeout_start(CONSOLE_ARCH_UART_BYTE_TRANSMIT_TIMEOUT_MS);
+				console_timeout_start(CONSOLE_ARCH_UART_BYTE_RECV_TIMEOUT_MS);
 			 }
 		}
 	}
@@ -161,7 +161,7 @@ int console_arch_common_comm_channel_receive(uint8_t * data, uint16_t * data_siz
 			if(rt == 0)
 			{
 				*console_state = CONSOLE_STATE_LISTEN;
-				console_timeout_start(CONSOLE_ARCH_UART_BYTE_TRANSMIT_TIMEOUT_MS);
+				console_timeout_start(CONSOLE_ARCH_UART_BYTE_RECV_TIMEOUT_MS);
 			}
 			break;
 		}
