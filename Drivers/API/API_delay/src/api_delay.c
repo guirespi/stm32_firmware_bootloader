@@ -4,22 +4,24 @@
  *  Created on: Jul 4, 2024
  *      Author: guirespi
  */
-#include <stdio.h>
 #include "api_delay.h"
+
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 
-void delayInit(delay_t *delay, tick_t duration) {
+void delay_init(delay_t *delay, tick_t duration) {
 	if (delay == NULL)
 		return;
+	delay->startTime = 0;
 	delay->running = false;
 	delay->duration = duration;
 }
 
-bool_t delayRead(delay_t *delay) {
+bool delay_read(delay_t *delay) {
 	if (delay == NULL)
 		return false;
 
-	bool_t rt = false;
+	bool rt = false;
 
 	if (delay->running == false) {
 		delay->startTime = HAL_GetTick();
@@ -32,7 +34,7 @@ bool_t delayRead(delay_t *delay) {
 	return rt;
 }
 
-void delayWrite(delay_t *delay, tick_t duration) {
+void delay_write(delay_t *delay, tick_t duration) {
 	if (delay == NULL)
 		return;
 
@@ -42,15 +44,15 @@ void delayWrite(delay_t *delay, tick_t duration) {
 	delay->duration = duration;
 }
 
-void delayTask(tick_t duration) {
+void delay_task(tick_t duration) {
 	delay_t delay = { 0 };
-	delayInit(&delay, duration);
-	while (!delayRead(&delay))
+	delay_init(&delay, duration);
+	while (!delay_read(&delay))
 		;
 }
 
-bool_t delayIsRunning(delay_t * delay)
+bool delay_is_running(delay_t * delay)
 {
-	bool_t rt =  delay->running;
+	bool rt =  delay->running;
 	return rt;
 }
