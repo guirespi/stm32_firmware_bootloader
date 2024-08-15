@@ -341,7 +341,7 @@ static int spi_flash_erase_block64(uint32_t address)
 	if(rt != SPI_FLASH_OK)
 		return rt;
 
-	return spi_flash_wait_until_chip_ready(SPI_FLASH_BLOCK64_SIZE);
+	return spi_flash_wait_until_chip_ready(SPI_FLASH_BLOCK64_ERASE_MAX_TIMEOUT);
 }
 
 static int spi_flash_erase_chip(void)
