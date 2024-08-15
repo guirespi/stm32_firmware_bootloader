@@ -399,6 +399,10 @@ int spi_flash_init(spi_if_hdle spi_if_hdle, spi_flash_cs_t cs_gpio)
 		rt = spi_flash_send_basic_command_receive(API_SPI_FLASH_CMD_READ_JEDEC_ID, (uint8_t *)&jedec_id, (uint16_t)sizeof(jedec_id));
 		if(rt != 0) return rt;
 
+		/* No memory can have capacity of zero bytes. So, the readed JEDEC ID is a no valid response */
+		if(jedec_id.memory_capacity == 0)
+			return SPI_FLASH_E_FAIL;
+
 		/* The chip size is the power of two of the third byte of the JEDEC ID */
 		spi_flash_chip.vendor_id = jedec_id.manufacturer_id;
 		spi_flash_chip.chip_type = jedec_id.memory_type;
